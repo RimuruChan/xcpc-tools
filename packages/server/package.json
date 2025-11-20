@@ -21,6 +21,7 @@
     "@hydrooj/framework": "0.2.1",
     "@myriaddreamin/typst-ts-web-compiler": "0.6.1-rc2",
     "@myteril/node-win-printer": "patch:@myteril/node-win-printer@npm%3A1.1.5#~/.yarn/patches/@myteril-node-win-printer-npm-1.1.5-c62910fcfd.patch",
+    "@point-of-sale/receipt-printer-encoder": "^3.0.3",
     "base16384": "^1.0.0",
     "cordis": "4.0.0-beta.5",
     "koa-proxies": "^0.12.4",

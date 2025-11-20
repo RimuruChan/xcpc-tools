@@ -32,40 +32,38 @@ const i18n = {
 
 export const receiptBalloonText = (
     id: number, location: string, problem: string, color: string, comment: string, teamname: string, status: string, lang: 'zh' | 'en' = 'zh',
-) => encoder
-    .initialize()
-    .codepage('cp936')
-    .setPinterType(config.balloonType ?? 80) // wrong typo in the library
-    .align('center')
-    .line('')
-    .bold(true)
-    .size(2)
-    .line(i18n[lang].receipt)
-    .emptyLine(1)
-    .line(`ID: ${String(id).substring(0, 8)}`)
-    .emptyLine(1)
-    .bold(false)
-    .size(1)
-    .line('===============================')
-    .emptyLine(1)
-    .oneLine(i18n[lang].location, location)
-    .oneLine(i18n[lang].problem, problem)
-    .oneLine(i18n[lang].color, color)
-    .oneLine(i18n[lang].comment, comment)
-    .emptyLine(1)
-    .align('center')
-    .bold(true)
-    .line('================================')
-    .emptyLine(1)
-    .size(0)
-    .line(`${i18n[lang].team}: ${teamname}`)
-    .line(`${i18n[lang].status}:`)
-    .line(`${status}`)
-    .emptyLine(1)
-    .line('Powered by hydro-dev/xcpc-tools')
-    .emptyLine(2)
-    .cut()
-    .encode();
+) => {
+    const res = encoder
+        .initialize()
+        .codepage('cp936')
+        .setPinterType(config.balloonType ?? 80) // wrong typo in the library
+        .align('center')
+        .line('')
+        .bold(true)
+        .size(2)
+        .line(i18n[lang].receipt)
+        .line(`ID: ${String(id).substring(0, 8)}`)
+        .bold(false)
+        .size(0)
+        .align('left')
+        .oneLine(i18n[lang].location, location)
+        .oneLine(i18n[lang].problem, problem)
+        .oneLine(i18n[lang].color, color)
+        .oneLine(i18n[lang].comment, comment)
+        .oneLine(i18n[lang].team, teamname)
+        .oneLine(i18n[lang].status, status)
+        .bold(true)
+        .align('center')
+        .emptyLine(1)
+        .line('================================')
+        .cut()
+        .encode();
+    if (res.length % 2 === 0) {
+        // Append a null byte to make it odd length, some printers will print garbage otherwise
+        return Uint8Array.from([...res, 0]);
+    }
+    return res;
+}
 
 export const plainBalloonText = (
     id: number, location: string, problem: string, color: string, comment: string, teamname: string, status: string, lang: 'zh' | 'en' = 'zh',
@@ -85,10 +83,7 @@ let timer = null;
 let printer = null;
 
 async function printBalloon(doc, lang) {
-    let status = '';
-    for (const i in doc.total) {
-        status += `- ${i}: ${getBalloonName(doc.total[i].color, lang)}\n`;
-    }
+    const status = Object.entries(doc.total).map(([k, v]) => k).join(', ');
     const genText = config.balloonType === 'plain' ? plainBalloonText : receiptBalloonText;
     const bReceipt = await genText(
         doc.balloonid,
